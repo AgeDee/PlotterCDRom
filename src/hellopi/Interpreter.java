@@ -281,7 +281,7 @@ public class Interpreter {
                     
                     //tutaj iteruj po okręgu do momentu aż nie będzie w odległości 0.5mm od punktu koncowego, nastepnie ustal ten punkt na sztywno
                     
-                    double step = 1/(double)100;
+                    double step = 1/(double)20;
                     int iCnt = findDegree(sX, sY, radius, posX, posY); //licznik iteracji
                     
                     double xCalc = posX;
@@ -290,7 +290,7 @@ public class Interpreter {
                     double xDist = Math.abs(x - xCalc);
                     double yDist = Math.abs(y - yCalc);
                     
-                    while(xDist > 0.001 && yDist > 0.001){
+                    while(xDist > 0.05 || yDist > 0.05){
                         iCnt++;
                         double radians = Math.toRadians(step*iCnt);
                         
@@ -302,8 +302,10 @@ public class Interpreter {
                         
                         upperAxis.setPos(yCalc, 40); //oś x
                         lowerAxis.setPos(xCalc, 40); //oś y
-                        //if(iCnt > 10000) break; //w przypadku błędu przerywa pętlę
+                        if(iCnt > 36000) break; //błąd
                     }
+                    
+                    System.out.println("Zakonczono w: " + xCalc + " " + yCalc);
                     
                     posX = x;
                     posY = y;
@@ -313,7 +315,7 @@ public class Interpreter {
                 }
                 break;
             case 7:
-                //X... Y... Z... I... J...
+                //X... Y... Z... I... J... F...
                 penDown();
                 if(args[1].charAt(0) == 'X' && args[2].charAt(0) == 'Y' && args[3].charAt(0) == 'Z' && args[4].charAt(0) == 'I' && args[5].charAt(0) == 'J' && args[6].charAt(0) == 'F') {
                     double x, y, z, i, j, f;
@@ -335,7 +337,7 @@ public class Interpreter {
                     
                     //tutaj iteruj po okręgu do momentu aż nie będzie w odległości 0.5mm od punktu koncowego, nastepnie ustal ten punkt na sztywno
                     
-                    double step = 1/(double)100;
+                    double step = 1/(double)20;
                     int iCnt = findDegree(sX, sY, radius, posX, posY); //licznik iteracji
                     
                     double xCalc = posX;
@@ -344,7 +346,7 @@ public class Interpreter {
                     double xDist = Math.abs(x - xCalc);
                     double yDist = Math.abs(y - yCalc);
                     
-                    while(xDist > 0.001 && yDist > 0.001){
+                    while(xDist > 0.05 || yDist > 0.05){
                         iCnt++;
                         double radians = Math.toRadians(step*iCnt);
                         
@@ -356,8 +358,10 @@ public class Interpreter {
                         
                         upperAxis.setPos(yCalc, 40); //oś x
                         lowerAxis.setPos(xCalc, 40); //oś y
-                        if(iCnt > 10000) break; //w przypadku błędu przerywa pętlę
+                        if(iCnt > 36000) break; //błąd
                     }
+                    
+                    System.out.println("Zakonczono w: " + xCalc + " " + yCalc);
                     
                     posX = x;
                     posY = y;
@@ -387,6 +391,47 @@ public class Interpreter {
                     i = Double.parseDouble(args[4].substring(1));
                     j = Double.parseDouble(args[5].substring(1));
                     System.out.println("Ruch narzedzia wedlug interpolacji kolowej przeciwnie do ruchu wskazowek zegara X Y Z I J:\t" + x + "\t" + y + "\t" + z + "\t" + i + "\t" + j);
+                    
+                    //operacje: 
+                    double sX = posX - i; //i j to są offsety od punktu start
+                    double sY = posY - j;
+                    
+                    double radius = Math.sqrt((sX - posX) * (sX - posX) + (sY - posY) * (sY - posY)); //pierwiastek z sum kwadratow rożnic
+                    
+                    System.out.println("Promien okregu: " + radius);
+                    
+                    //tutaj iteruj po okręgu do momentu aż nie będzie w odległości 0.5mm od punktu koncowego, nastepnie ustal ten punkt na sztywno
+                    
+                    double step = 1/(double)20;
+                    int iCnt = findDegree(sX, sY, radius, posX, posY); //licznik iteracji
+                    int endCnt = findDegree(sX, sY, radius, x, y);
+                    
+                    double xCalc = posX;
+                    double yCalc = posY;
+                    
+                    double xDist = Math.abs(x - xCalc);
+                    double yDist = Math.abs(y - yCalc);
+                    
+                    while(xDist > 0.05 || yDist > 0.05){
+                        iCnt++;
+                        double radians = Math.toRadians(step*(endCnt - iCnt));
+                        
+                        xCalc = Math.sin(radians) * radius + sX; 
+                        yCalc = Math.cos(radians) * radius + sY;
+                        
+                        xDist = Math.abs(x - xCalc); //odswiezenie obliczen
+                        yDist = Math.abs(y - yCalc);
+                        
+                        upperAxis.setPos(yCalc, 40); //oś x
+                        lowerAxis.setPos(xCalc, 40); //oś y
+                        if(iCnt > 36000) break; //błąd
+                    }
+                    
+                    System.out.println("Zakonczono w: " + xCalc + " " + yCalc);
+                    
+                    posX = x;
+                    posY = y;
+                    
                 }else{
                     System.out.println("Blad funkcji G03. Liczba argumentow 5.");
                 }
@@ -403,6 +448,47 @@ public class Interpreter {
                     j = Double.parseDouble(args[5].substring(1));
                     f = Double.parseDouble(args[6].substring(1));
                     System.out.println("Ruch narzedzia wedlug interpolacji przeciwnie do ruchu wskazowek zegara X Y Z I J:\t" + x + "\t" + y + "\t" + z + "\t" + i + "\t" + j + "\t" + f);
+                
+                    //operacje: 
+                    double sX = posX - i; //i j to są offsety od punktu start
+                    double sY = posY - j;
+                    
+                    double radius = Math.sqrt((sX - posX) * (sX - posX) + (sY - posY) * (sY - posY)); //pierwiastek z sum kwadratow rożnic
+                    
+                    System.out.println("Promien okregu: " + radius);
+                    
+                    //tutaj iteruj po okręgu do momentu aż nie będzie w odległości 0.5mm od punktu koncowego, nastepnie ustal ten punkt na sztywno
+                    
+                    double step = 1/(double)20;
+                    int iCnt = findDegree(sX, sY, radius, posX, posY); //licznik iteracji
+                    int endCnt = findDegree(sX, sY, radius, x, y);
+                    
+                    double xCalc = posX;
+                    double yCalc = posY;
+                    
+                    double xDist = Math.abs(x - xCalc);
+                    double yDist = Math.abs(y - yCalc);
+                    
+                    while(xDist > 0.05 || yDist > 0.05){
+                        iCnt++;
+                        double radians = Math.toRadians(step*(endCnt - iCnt));
+                        
+                        xCalc = Math.sin(radians) * radius + sX; 
+                        yCalc = Math.cos(radians) * radius + sY;
+                        
+                        xDist = Math.abs(x - xCalc); //odswiezenie obliczen
+                        yDist = Math.abs(y - yCalc);
+                        
+                        upperAxis.setPos(yCalc, 40); //oś x
+                        lowerAxis.setPos(xCalc, 40); //oś y
+                        if(iCnt > 36000) break; //błąd
+                    }
+                    
+                    System.out.println("Zakonczono w: " + xCalc + " " + yCalc);
+                    
+                    posX = x;
+                    posY = y;
+                
                 }else{
                     System.out.println("Blad funkcji G03. Liczba argumentow 6.");
                 }
@@ -446,7 +532,7 @@ public class Interpreter {
 
     private int findDegree(double sX, double sY, double radius, double x, double y){
         
-        double step = 1/(double)100;
+        double step = 1/(double)20;
         int iCnt = 0; //licznik iteracji
 
         double xCalc = sX;
@@ -455,7 +541,7 @@ public class Interpreter {
         double xDist = Math.abs(x - xCalc);
         double yDist = Math.abs(y - yCalc);
         
-        while(xDist > 0.001 || yDist > 0.001){
+        while(xDist > 0.05 || yDist > 0.05){
             iCnt++;
             double radians = Math.toRadians(step*iCnt);
 
@@ -465,7 +551,7 @@ public class Interpreter {
             xDist = Math.abs(x - xCalc); //odswiezenie obliczen
             yDist = Math.abs(y - yCalc);
             
-            if(iCnt > 100000) break; //w przypadku błędu przerywa pętlę
+            //if(iCnt > 100000) break; //w przypadku błędu przerywa pętlę
         }
         
         System.out.println("Znaleziono licznik: " + iCnt);
