@@ -276,11 +276,11 @@ public class Interpreter {
                         double degrees = a/(double)10;
                         double radians = Math.toRadians(degrees);
 
-                        double x = Math.sin(radians) * 10 + 20; //R = 10mm, środek w 20mm
-                        double y = Math.cos(radians) * 10 + 20; //R = 10mm, środek w 20mm
-
-                        osGorna.setPos(y, 40); //oś x
-                        osDolna.setPos(x, 40); //oś y
+//                        double x = Math.sin(radians) * 10 + 20; //R = 10mm, środek w 20mm
+//                        double y = Math.cos(radians) * 10 + 20; //R = 10mm, środek w 20mm
+//
+//                        osGorna.setPos(y, 40); //oś x
+//                        osDolna.setPos(x, 40); //oś y
                     }
                      
                     
